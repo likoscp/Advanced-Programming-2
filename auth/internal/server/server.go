@@ -20,7 +20,10 @@ func NewServer(config *config.Config) *Server {
 	return &s
 }
 
+
 func (s *Server) Run() error {
+
+	// s.Router.HandleFunc("/")
 
 	return http.ListenAndServe(s.config.Addr, s.Router)
 }

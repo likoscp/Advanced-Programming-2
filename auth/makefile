@@ -1,6 +1,6 @@
 .PHONY: build
 build:
-	go build -v -o a ./cmd/auth
+	go build -v -o a ./cmd/authO2
 
 .PHONY: test
 test:
@@ -8,6 +8,6 @@ test:
 
 .PHONY: start
 start:
-	go run ./cmd/auth
+	go run ./cmd/authO2
 
 .DEFAULT_GOAL := build

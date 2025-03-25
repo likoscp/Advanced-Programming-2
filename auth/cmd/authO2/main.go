@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"os"
 
 	"github.com/likoscp/Advanced-Programming-2/auth/internal/config"
 	"github.com/likoscp/Advanced-Programming-2/auth/internal/server"
@@ -14,13 +15,10 @@ var (
 )
 
 func init() {
-	flag.IntVar(&port, "port", 8081, "number of port")
+	flag.IntVar(&port, "port", 8081, "number port")
 }
 
 func main() {
-	c := config.Config{Addr: ":8081"}
-	s := server.NewServer(&c)
-
 	logger := log.New()
 
 	logger.SetFormatter(&prefixed.TextFormatter{
@@ -30,9 +28,16 @@ func main() {
 		ForceFormatting: true,
 	})
 
-	log.Error("faeioifajo")
+	c, err := config.NewConfig()
+	if err != nil {
+		log.Error(err)
+		os.Exit(1)
+	}
+
+	s := server.NewServer(c)
 
 	if err := s.Run(); err != nil {
-
+		log.Error(err)
+		os.Exit(1)
 	}
 }
