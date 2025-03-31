@@ -3,7 +3,10 @@ package config
 import "github.com/joho/godotenv"
 
 type Config struct {
-	Addr string
+	Addr     string
+	MongoUri string
+	DBname   string
+	CollectionName string
 }
 
 func NewConfig() (*Config, error) {
@@ -12,5 +15,10 @@ func NewConfig() (*Config, error) {
 		return nil, err
 	}
 
-	return &Config{Addr: c["ADDR"]}, nil
+	return &Config{
+		Addr: c["ADDR"],
+		MongoUri: c["MONGO"],
+		DBname:   c["DBname"],
+		CollectionName: c["COLLECTION"],}, 
+		nil
 }

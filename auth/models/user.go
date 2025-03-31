@@ -13,3 +13,7 @@ type User struct {
 	Email      string             `bson:"email,omitempty"`
 	RegisterAt time.Time          `bson:"register_at,omitempty"`
 }
+
+func (u *User) IsValid() bool {
+	return true
+}
