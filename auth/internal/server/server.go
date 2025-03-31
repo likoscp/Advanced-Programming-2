@@ -23,7 +23,15 @@ func NewServer(config *config.Config) *Server {
 
 func (s *Server) Run() error {
 
-	// s.Router.HandleFunc("/")
+	s.Configure()
 
 	return http.ListenAndServe(s.config.Addr, s.Router)
+}
+
+func (s *Server) Configure() {
+	s.Router.Handle("/ping", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(`PONG`))
+	})).Methods("GET")
+		
+
 }

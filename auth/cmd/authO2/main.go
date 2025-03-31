@@ -16,17 +16,17 @@ var (
 
 func init() {
 	flag.IntVar(&port, "port", 8081, "number port")
-}
-
-func main() {
 	logger := log.New()
-
+	
 	logger.SetFormatter(&prefixed.TextFormatter{
 		DisableColors:   false,
 		TimestampFormat: "2006-01-02 15:04:05",
 		FullTimestamp:   true,
 		ForceFormatting: true,
 	})
+}
+
+func main() {
 
 	c, err := config.NewConfig()
 	if err != nil {
@@ -35,6 +35,7 @@ func main() {
 	}
 
 	s := server.NewServer(c)
+	log.Info("server start on port:", c.Addr)
 
 	if err := s.Run(); err != nil {
 		log.Error(err)
