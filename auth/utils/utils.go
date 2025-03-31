@@ -6,8 +6,8 @@ import (
 )
 
 func Response(w http.ResponseWriter, r *http.Request, code int, data interface{}) {
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
-	w.Header().Set("ContentType", "application/json")
 	json.NewEncoder(w).Encode(data)
 }
 

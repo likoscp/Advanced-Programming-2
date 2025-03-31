@@ -11,7 +11,7 @@ import (
 
 type MongoDB struct {
 	uri            string
-	config         config.Config
+	config         *config.Config
 	userRepository *repository.UserRepository
 	db             *mongo.Database
 	clinet         *mongo.Client
@@ -33,6 +33,7 @@ func NewMongoDB(config *config.Config) (*MongoDB, error) {
 		uri:    config.MongoUri,
 		db:     db,
 		clinet: client,
+		config: config,
 	}, nil
 }
 

@@ -46,7 +46,7 @@ func (u *UserHandler) RegisterUser() http.HandlerFunc {
 		if !user.IsValid() {
 			log.Warn("incorrect user property")
 			utils.Error(w, r, http.StatusBadRequest, errors.New("incorrect data"))
-			return 
+			return
 		}
 		if err := user.CryptPassword(); err != nil {
 			utils.Error(w, r, http.StatusInternalServerError, err)
@@ -54,7 +54,7 @@ func (u *UserHandler) RegisterUser() http.HandlerFunc {
 			return
 		}
 
-		if err := u.db.UserRepo().RegisterUser(&user); err != nil {
+		if err := u.db.UserRepo().Register(&user); err != nil {
 			utils.Error(w, r, http.StatusInternalServerError, err)
 			log.Error("cannot save user into db: ", err)
 			return
@@ -64,6 +64,8 @@ func (u *UserHandler) RegisterUser() http.HandlerFunc {
 			Msg: "user register succesfully",
 		}
 		utils.Response(w, r, http.StatusCreated, res)
-		
+		log.Info("handle users/register")
 	}
 }
+
+// func (u *UserHandler) LoginUser
