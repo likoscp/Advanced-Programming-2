@@ -17,8 +17,7 @@ type MongoDB struct {
 	clinet         *mongo.Client
 }
 
-func NewMongoDB(config config.Config) (*MongoDB, error) {
-
+func NewMongoDB(config *config.Config) (*MongoDB, error) {
 	ClientOptions := options.Client().ApplyURI(config.MongoUri)
 	client, err := mongo.Connect(context.TODO(), ClientOptions)
 	if err != nil {

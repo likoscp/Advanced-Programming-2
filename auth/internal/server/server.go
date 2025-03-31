@@ -1,23 +1,31 @@
 package server
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
 	"github.com/likoscp/Advanced-Programming-2/auth/internal/config"
 	"github.com/likoscp/Advanced-Programming-2/auth/internal/handler"
+	"github.com/likoscp/Advanced-Programming-2/auth/internal/store"
 )
 
 type Server struct {
-	userHandler  *handler.UserHandler
-	config *config.Config
-	Router *mux.Router
+	userHandler *handler.UserHandler
+	config      *config.Config
+	Router      *mux.Router
 }
 
 func NewServer(config *config.Config) *Server {
 	router := mux.NewRouter()
+	storage, err := store.NewMongoDB(config)
 
-	s := Server{Router: router, config: config}
+	if err != nil {
+		log.Fatalf("cannot connect to db: %v", err)
+	}
+
+	userHanlder := handler.NewUserHandler(storage)
+	s := Server{Router: router, config: config, userHandler: userHanlder}
 
 	return &s
 }
@@ -34,5 +42,5 @@ func (s *Server) Configure() {
 		w.Write([]byte(`PONG`))
 	})).Methods("GET")
 
-	s.Router.HandleFunc("/user/register", s.userHandler.RegisterUser())
+	s.Router.HandleFunc("/user/register", s.userHandler.RegisterUser()).Methods("POST")
 }

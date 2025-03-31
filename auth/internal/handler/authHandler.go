@@ -2,10 +2,12 @@ package handler
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/likoscp/Advanced-Programming-2/auth/internal/store"
 	"github.com/likoscp/Advanced-Programming-2/auth/models"
+	"github.com/likoscp/Advanced-Programming-2/auth/utils"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -25,10 +27,14 @@ func (u *UserHandler) RegisterUser() http.HandlerFunc {
 		Email    string `json:"email"`
 		Password string `json:"password"`
 	}
+	type Response struct {
+		Msg string `json:"msg"`
+	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		req := Request{}
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-			log.Error("register, cannot read from json: ", err)
+			utils.Error(w, r, http.StatusBadRequest, err)
+			log.Warn("register, cannot read from json: ", err)
 			return
 		}
 		user := models.User{
@@ -37,10 +43,27 @@ func (u *UserHandler) RegisterUser() http.HandlerFunc {
 			Password: req.Password,
 		}
 
+		if !user.IsValid() {
+			log.Warn("incorrect user property")
+			utils.Error(w, r, http.StatusBadRequest, errors.New("incorrect data"))
+			return 
+		}
+		if err := user.CryptPassword(); err != nil {
+			utils.Error(w, r, http.StatusInternalServerError, err)
+			log.Warn("cannot encrypt user: ", err)
+			return
+		}
+
 		if err := u.db.UserRepo().RegisterUser(&user); err != nil {
+			utils.Error(w, r, http.StatusInternalServerError, err)
 			log.Error("cannot save user into db: ", err)
 			return
 		}
-		w.Write([]byte("register user"))
+
+		res := Response{
+			Msg: "user register succesfully",
+		}
+		utils.Response(w, r, http.StatusCreated, res)
+		
 	}
 }
