@@ -32,7 +32,19 @@ func (u *UserRepository) Register(user *models.User) error {
 	return nil
 }
 
-func (u *UserRepository) Login(user *models.User) error {
-	
-	return nil
+func (u *UserRepository) Login(email string) (*models.User, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+
+	var u1 models.User
+	err := u.Collection.FindOne(ctx, bson.M{"email": email}).Decode(&u1)
+	if mongo.ErrNoDocuments == err {
+		return nil, fmt.Errorf("no email with this user")
+	}
+
+	if err != nil && err != mongo.ErrNoDocuments{
+		return nil, err
+	}
+
+	return &u1, nil
 }

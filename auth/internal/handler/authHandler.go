@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/likoscp/Advanced-Programming-2/auth/internal/store"
 	"github.com/likoscp/Advanced-Programming-2/auth/models"
@@ -54,6 +55,8 @@ func (u *UserHandler) RegisterUser() http.HandlerFunc {
 			return
 		}
 
+		user.RegisterAt = time.Now()
+
 		if err := u.db.UserRepo().Register(&user); err != nil {
 			utils.Error(w, r, http.StatusInternalServerError, err)
 			log.Error("cannot save user into db: ", err)
@@ -68,4 +71,36 @@ func (u *UserHandler) RegisterUser() http.HandlerFunc {
 	}
 }
 
-// func (u *UserHandler) LoginUser
+func (u *UserHandler) Login() http.HandlerFunc {
+	type Request struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+	type Res struct {
+		Msg string `json:"msg"`
+	}
+	return func(w http.ResponseWriter, r *http.Request) {
+		req := Request{}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			utils.Error(w, r, http.StatusBadRequest, err)
+			log.Warn("register, cannot read from json: ", err)
+			return
+		}
+
+		u, err := u.db.UserRepo().Login(req.Email)
+		if err != nil {
+			utils.Response(w, r, http.StatusBadRequest, Res{Msg: "incorrect email or password"})
+			log.Warn("login, no email:", err)
+			return
+		}
+
+		if !u.IsCorrectPassword(req.Password) {
+			utils.Response(w, r, http.StatusBadRequest, Res{Msg: "incorrect email or password"})
+			log.Warn("login, incorrect password")
+			return
+		}
+
+		utils.Response(w, r, http.StatusAccepted, Res{Msg: "login successfully"})
+		log.Info("handle /users/login")
+	}
+}

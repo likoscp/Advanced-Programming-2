@@ -43,4 +43,5 @@ func (s *Server) Configure() {
 	})).Methods("GET")
 
 	s.Router.HandleFunc("/user/register", s.userHandler.RegisterUser()).Methods("POST")
+	s.Router.HandleFunc("/user/login", s.userHandler.Login()).Methods("POST")
 }
