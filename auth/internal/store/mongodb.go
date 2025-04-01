@@ -10,11 +10,12 @@ import (
 )
 
 type MongoDB struct {
-	uri            string
-	config         *config.Config
-	userRepository *repository.UserRepository
-	db             *mongo.Database
-	clinet         *mongo.Client
+	uri             string
+	config          *config.Config
+	userRepository  *repository.UserRepository
+	adminRepository *repository.AdminRepository
+	db              *mongo.Database
+	clinet          *mongo.Client
 }
 
 func NewMongoDB(config *config.Config) (*MongoDB, error) {
@@ -40,8 +41,17 @@ func NewMongoDB(config *config.Config) (*MongoDB, error) {
 func (m *MongoDB) UserRepo() *repository.UserRepository {
 	if m.userRepository == nil {
 		m.userRepository = &repository.UserRepository{
-			Collection: m.db.Collection(m.config.CollectionName),
+			Collection: m.db.Collection(m.config.Collection),
 		}
 	}
 	return m.userRepository
+}
+
+func (m *MongoDB) AdminRepo() *repository.AdminRepository {
+	if m.adminRepository == nil {
+		m.adminRepository = &repository.AdminRepository{
+			Collection: m.db.Collection(m.config.AdminCollection),
+		}
+	}
+	return m.adminRepository
 }
