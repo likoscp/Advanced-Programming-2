@@ -11,9 +11,9 @@ import (
 )
 
 type Server struct {
-	userHandler *handler.UserHandler
-	config      *config.Config
-	Router      *mux.Router
+	handler *handler.Handler
+	config  *config.Config
+	Router  *mux.Router
 }
 
 func NewServer(config *config.Config) *Server {
@@ -24,8 +24,8 @@ func NewServer(config *config.Config) *Server {
 		log.Fatalf("cannot connect to db: %v", err)
 	}
 
-	userHanlder := handler.NewUserHandler(storage, config)
-	s := Server{Router: router, config: config, userHandler: userHanlder}
+	handler := handler.NewHandler(storage, config)
+	s := Server{Router: router, config: config, handler: handler}
 
 	return &s
 }
@@ -42,6 +42,8 @@ func (s *Server) Configure() {
 		w.Write([]byte(`PONG`))
 	})).Methods("GET")
 
-	s.Router.HandleFunc("/user/register", s.userHandler.RegisterUser()).Methods("POST")
-	s.Router.HandleFunc("/user/login", s.userHandler.Login()).Methods("POST")
+	s.Router.HandleFunc("/user/register", s.handler.UserHandler().RegisterUser()).Methods("POST")
+	s.Router.HandleFunc("/user/login", s.handler.UserHandler().Login()).Methods("POST")
+	s.Router.HandleFunc("/admin/register", s.handler.AdminHandler().Register()).Methods("POST")
+	s.Router.HandleFunc("/admin/login", s.handler.AdminHandler().Login()).Methods("POST")
 }
