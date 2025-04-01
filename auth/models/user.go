@@ -45,3 +45,6 @@ func (u *User) CryptPassword() error {
 func (u *User) IsCorrectPassword(password string) bool {
 	return bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password)) == nil
 }
+func (u User) Role() string {
+	return "user"
+}

@@ -24,7 +24,7 @@ func NewServer(config *config.Config) *Server {
 		log.Fatalf("cannot connect to db: %v", err)
 	}
 
-	userHanlder := handler.NewUserHandler(storage)
+	userHanlder := handler.NewUserHandler(storage, config)
 	s := Server{Router: router, config: config, userHandler: userHanlder}
 
 	return &s

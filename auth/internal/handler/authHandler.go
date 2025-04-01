@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/golang-jwt/jwt"
+	"github.com/likoscp/Advanced-Programming-2/auth/internal/config"
 	"github.com/likoscp/Advanced-Programming-2/auth/internal/store"
 	"github.com/likoscp/Advanced-Programming-2/auth/models"
 	"github.com/likoscp/Advanced-Programming-2/auth/utils"
@@ -13,12 +15,14 @@ import (
 )
 
 type UserHandler struct {
-	db *store.MongoDB
+	db     *store.MongoDB
+	config *config.Config
 }
 
-func NewUserHandler(db *store.MongoDB) *UserHandler {
+func NewUserHandler(db *store.MongoDB, config *config.Config) *UserHandler {
 	return &UserHandler{
-		db: db,
+		db:     db,
+		config: config,
 	}
 }
 
@@ -57,6 +61,24 @@ func (u *UserHandler) RegisterUser() http.HandlerFunc {
 
 		user.RegisterAt = time.Now()
 
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256,
+			jwt.MapClaims{
+				"_id": user.ID,
+				"role": user.Role(),
+				"exp": time.Now().Add(time.Hour * 24).Unix(),
+			})
+
+		tokenString, err := token.SignedString([]byte(u.config.SECRET))
+		if err != nil {
+			utils.Error(w, r, http.StatusInternalServerError, err)
+			log.Error("cannot save cookie: ", err)
+			return
+		}
+
+		cookie := http.Cookie{Name: "token", Value: tokenString}
+
+		http.SetCookie(w, &cookie)
+
 		if err := u.db.UserRepo().Register(&user); err != nil {
 			utils.Error(w, r, http.StatusInternalServerError, err)
 			log.Error("cannot save user into db: ", err)
@@ -87,18 +109,36 @@ func (u *UserHandler) Login() http.HandlerFunc {
 			return
 		}
 
-		u, err := u.db.UserRepo().Login(req.Email)
+		user, err := u.db.UserRepo().Login(req.Email)
 		if err != nil {
 			utils.Response(w, r, http.StatusBadRequest, Res{Msg: "incorrect email or password"})
 			log.Warn("login, no email:", err)
 			return
 		}
 
-		if !u.IsCorrectPassword(req.Password) {
+		if !user.IsCorrectPassword(req.Password) {
 			utils.Response(w, r, http.StatusBadRequest, Res{Msg: "incorrect email or password"})
 			log.Warn("login, incorrect password")
 			return
 		}
+
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256,
+			jwt.MapClaims{
+				"_id": user.ID,
+				"role": user.Role(),
+				"exp": time.Now().Add(time.Hour * 24).Unix(),
+			})
+
+		tokenString, err := token.SignedString([]byte(u.config.SECRET))
+		if err != nil {
+			utils.Error(w, r, http.StatusInternalServerError, err)
+			log.Error("cannot save cookie: ", err)
+			return
+		}
+
+		cookie := http.Cookie{Name: "token", Value: tokenString}
+
+		http.SetCookie(w, &cookie)
 
 		utils.Response(w, r, http.StatusAccepted, Res{Msg: "login successfully"})
 		log.Info("handle /users/login")
