@@ -1,0 +1,35 @@
+# Ignore the .env file containing sensitive data
+.env
+
+# Ignore compiled binaries and executable files
+*.exe
+*.dll
+*.so
+*.a
+
+# Ignore Go build artifacts
+/bin/
+/pkg/
+
+# Ignore IDE/editor-specific files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Ignore logs and temporary files
+*.log
+*.tmp
+*.bak
+
+# Ignore vendor directory (if not using Go modules)
+/vendor/
+
+# Ignore macOS-specific files
+.DS_Store
+
+# Ignore Windows-specific files
+Thumbs.db
+
+# Ignore coverage reports
+coverage.out
