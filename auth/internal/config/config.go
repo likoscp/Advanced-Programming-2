@@ -9,6 +9,7 @@ type Config struct {
 	Collection      string
 	SECRET          string
 	AdminCollection string
+	MailURI         string
 }
 
 func NewConfig() (*Config, error) {
@@ -23,6 +24,8 @@ func NewConfig() (*Config, error) {
 			DBname:          c["DBname"],
 			Collection:      c["COLLECTION"],
 			SECRET:          c["SECRET"],
-			AdminCollection: c["ADMIN_COLLECTION"]},
+			AdminCollection: c["ADMIN_COLLECTION"],
+			MailURI:         c["MAIL_URI"]},
+
 		nil
 }
