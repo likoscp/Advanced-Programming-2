@@ -2,12 +2,12 @@ package handler
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
 	"time"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/likoscp/Advanced-Programming-2/auth/internal/config"
+	"github.com/likoscp/Advanced-Programming-2/auth/internal/service"
 	"github.com/likoscp/Advanced-Programming-2/auth/internal/store"
 	"github.com/likoscp/Advanced-Programming-2/auth/models"
 	"github.com/likoscp/Advanced-Programming-2/auth/utils"
@@ -15,14 +15,16 @@ import (
 )
 
 type AdminHandler struct {
-	db     *store.MongoDB
-	config *config.Config
+	db           *store.MongoDB
+	config       *config.Config
+	adminService *service.AdminService
 }
 
 func NewAdminHandler(db *store.MongoDB, config *config.Config) *AdminHandler {
 	return &AdminHandler{
-		db:     db,
-		config: config,
+		db:           db,
+		config:       config,
+		adminService: service.NewAdminrService(db, config),
 	}
 }
 
@@ -48,45 +50,15 @@ func (u *AdminHandler) Register() http.HandlerFunc {
 			Password: req.Password,
 		}
 
-		if !admin.IsValid() {
-			log.Warn("incorrect admin property")
-			utils.Error(w, r, http.StatusBadRequest, errors.New("incorrect data"))
-			return
-		}
-		if err := admin.CryptPassword(); err != nil {
-			utils.Error(w, r, http.StatusInternalServerError, err)
-			log.Warn("cannot encrypt user: ", err)
-			return
-		}
-
-		admin.RegisterAt = time.Now()
-
-		token := jwt.NewWithClaims(jwt.SigningMethodHS256,
-			jwt.MapClaims{
-				"_id":  admin.ID,
-				"role": admin.Role(),
-				"exp":  time.Now().Add(time.Hour * 24).Unix(),
-			})
-
-		tokenString, err := token.SignedString([]byte(u.config.SECRET))
+		msg, cookie, err := u.adminService.Register(&admin)
 		if err != nil {
 			utils.Error(w, r, http.StatusInternalServerError, err)
-			log.Error("cannot save cookie: ", err)
 			return
 		}
-
-		cookie := http.Cookie{Name: "token", Value: tokenString}
-
-		http.SetCookie(w, &cookie)
-
-		if err := u.db.AdminRepo().Register(&admin); err != nil {
-			utils.Error(w, r, http.StatusInternalServerError, err)
-			log.Error("cannot save user into db: ", err)
-			return
-		}
+		http.SetCookie(w, cookie)
 
 		res := Response{
-			Msg: "user register succesfully",
+			Msg: msg,
 		}
 		utils.Response(w, r, http.StatusCreated, res)
 		log.Info("handle users/register")
