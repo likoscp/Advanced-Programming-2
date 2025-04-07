@@ -2,6 +2,6 @@ package store
 
 import "github.com/likoscp/Advanced-Programming-2/backend/internal/config"
 
-type S3 struct {
+type MongoDB struct {
 	config *config.Config
 }
