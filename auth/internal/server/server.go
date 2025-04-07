@@ -41,6 +41,21 @@ func (s *Server) Configure() {
 	s.Router.Handle("/ping", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`PONG`))
 	})).Methods("GET")
+	s.Router.Use(func(next http.Handler) http.Handler {
+        return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+            w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000") 
+            w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+            w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+            w.Header().Set("Access-Control-Allow-Credentials", "true")
+            
+            if r.Method == "OPTIONS" {
+                w.WriteHeader(http.StatusOK)
+                return
+            }
+            
+            next.ServeHTTP(w, r)
+        })
+    })
 
 	s.Router.HandleFunc("/user/register", s.handler.UserHandler().RegisterUser()).Methods("POST")
 	s.Router.HandleFunc("/user/login", s.handler.UserHandler().Login()).Methods("POST")

@@ -11,16 +11,20 @@ export default function SignIn() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
+    
         try {
-            const response = await axios.post("https://store-gyhu.vercel.app/Auth/sign-in", {
-                email,
-                password,
-            });
-
-            localStorage.setItem("token", response.data.token);
-            console.log("Token saved:", response.data.token);
-
+            const response = await axios.post(
+                "http://localhost:8081/user/login",
+                JSON.stringify({ email, password }),
+                {
+                    withCredentials: true,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+    
+            console.log("Login successful");
             router.push("/");
         } catch (err) {
             setError("Invalid email or password!");
@@ -29,7 +33,6 @@ export default function SignIn() {
     };
 
     return (
-
         <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
             <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
                 <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
@@ -80,8 +83,8 @@ export default function SignIn() {
                             Sign in
                         </button>
                         <p className="text-sm font-light text-gray-500 dark:text-gray-400">
-                            Don’t have an account yet?{" "}
-                            <a href="#" className="font-medium text-primary-600 hover:underline dark:text-primary-500">
+                            Don't have an account yet?{" "}
+                            <a href="/signup" className="font-medium text-primary-600 hover:underline dark:text-primary-500">
                                 Sign up
                             </a>
                         </p>
@@ -89,6 +92,5 @@ export default function SignIn() {
                 </div>
             </div>
         </div>
-
     );
 }
