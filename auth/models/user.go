@@ -7,8 +7,8 @@ import (
 
 type User struct {
 	ID       string
-	Password string `validate:"required,email"`
-	Email    string `validate:"required,min=5,max=25"`
+	Password string `validate:"required,min=5,max=25"`
+	Email    string `validate:"required,email"`
 }
 
 func (u *User) IsValid() error {
@@ -29,4 +29,9 @@ func (u *User) HashPassword() error {
 	}
 	u.Password = string(bytes)
 	return nil
+}
+
+func (u *User) ComparePassword(u2 User) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(u2.Password), []byte(u.Password))
+    return err == nil
 }

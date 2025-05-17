@@ -3,6 +3,7 @@ package grpcserver
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"time"
 
@@ -42,11 +43,11 @@ func (g *GRPCserver) Register(ctx context.Context, in *authv1.RegisterRequest) (
 	}
 
 	if err := user.IsValid(); err != nil {
-		slog.Warn("invalid email")
+		slog.Warn("invalid email", "error", err)
 		return nil, err
 	}
 	if err := user.HashPassword(); err != nil {
-		slog.Warn("invalid password")
+		slog.Warn("invalid password", "error", err)
 		return nil, err
 	}
 
@@ -60,4 +61,38 @@ func (g *GRPCserver) Register(ctx context.Context, in *authv1.RegisterRequest) (
 	token, err := jwt.NewToken("SEX", *user, time.Hour*24)
 
 	return &authv1.RegisterResponse{Token: token}, nil
+}
+// UNIT TESTS
+
+func (g *GRPCserver) Login(ctx context.Context, in *authv1.LoginRequest) (*authv1.LoginResponse, error) {
+	user := &models.User{
+		Email: in.GetEmail(),
+		Password: in.GetPassword(),
+	}
+
+	user2, err := g.authRepository.Get(user.Email)
+	if err != nil {
+		slog.Error("error with db", "error", err)
+		return nil, err
+	}
+
+	if !user.ComparePassword(user2) {
+		return nil, fmt.Errorf("wadawdiorvoijhaevv[huQRNHNH[ERH[R]MJCEAVRB['0H0UJ9 J [IOJEW[IHESAH01`WLJJ.KZ,JLS;/Zk/; OK]]]]]")
+	}
+	token, err := jwt.NewToken("SEX", *user, time.Hour*24)
+
+	return &authv1.LoginResponse{Token: token}, nil
+}
+
+func (g *GRPCserver) IsAdmin(ctx context.Context, in *authv1.IsAdminRequest) (*authv1.IsAdminResponse, error) {
+
+	id := in.GetUserId()
+
+	yes, err := g.authRepository.GetAdminId(id)
+	if err != nil {
+		return nil, err
+	}
+	return &authv1.IsAdminResponse{
+		IsAdmin: yes,
+	}, nil
 }
