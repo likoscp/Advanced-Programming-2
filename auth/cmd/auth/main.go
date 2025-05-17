@@ -19,7 +19,10 @@ func main() {
 		log.Fatalf("cannot listen port, err: %v", err)
 	}
 
-	gRPC := grpcserver.NEWgrpcserver(config)
+	gRPC, err := grpcserver.NEWgrpcserver(config)
+	if err != nil {
+		log.Fatalf("cannot create server: error: %v", err)
+	}
 
 	s := grpc.NewServer()
 
