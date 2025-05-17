@@ -13,6 +13,7 @@ type Config struct {
 
 type ConfigServer struct {
 	Addr string `mapstructure:"SERVER_ADDR"`
+	AuthAddr string `mapstructure:"AUTH_ADDR"`
 }
 
 // type ConfigDB struct {
@@ -24,15 +25,19 @@ type ConfigServer struct {
 // }
 
 func NewConfig() *Config {
-	config := Config{}
+	viper.SetConfigFile(".env")
 	err := viper.ReadInConfig()
 	if err != nil {
 		log.Fatal("Can't find the file .env : ", err)
 	}
 
-	err = viper.Unmarshal(&config)
+	configServer := ConfigServer{}
+
+	err = viper.Unmarshal(&configServer)
 	if err != nil {
 		log.Fatal("Environment can't be loaded: ", err)
 	}
-	return &config
+	return &Config{
+		ConfigServer: &configServer,
+	}
 }

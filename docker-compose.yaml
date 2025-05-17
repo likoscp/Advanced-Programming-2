@@ -10,12 +10,12 @@ services:
     depends_on:
       - db
       
-  auth:
-    build: ./auth
-    ports:
-      - "50051:50051"
-    depends_on:
-      - backend
+  # auth:
+  #   build: ./auth
+  #   ports:
+  #     - "50051:50051"
+  #   depends_on:
+  #     - backend
 
   db:
     image: postgres:15
