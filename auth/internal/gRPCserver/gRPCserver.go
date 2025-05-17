@@ -3,6 +3,7 @@ package grpcserver
 import (
 	"context"
 	"errors"
+	"log/slog"
 
 	authv1 "github.com/barcek2281/finalProto/gen/go/auth"
 	"github.com/likoscp/Advanced-Programming-2/auth/internal/configs"
@@ -39,15 +40,20 @@ func (g *GRPCserver) Register(ctx context.Context, in *authv1.RegisterRequest) (
 	}
 
 	if !user.IsValid() {
+		slog.Warn("invalid email")
 		return nil, ErrNotValidEmail
 	}
 	if !user.IsValidPassword() {
+		slog.Warn("invalid password")
+
 		return nil, ErrNotValidPassword
 	}
 
 	id, err := g.authRepository.Create(user)
 
 	if err != nil {
+		slog.Error("error to create user", "err", err)
+
 		return nil, err
 	}
 	return &authv1.RegisterResponse{Token: id}, nil

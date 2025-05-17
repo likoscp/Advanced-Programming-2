@@ -14,7 +14,7 @@ import (
 func main() {
 	config := configs.NewConfig()
 
-	lis, err := net.Listen("tcp", config.ConfigServer.Addr)
+	lis, err := net.Listen("tcp", ":" + config.ConfigServer.Addr)
 	if err != nil {
 		log.Fatalf("cannot listen port, err: %v", err)
 	}

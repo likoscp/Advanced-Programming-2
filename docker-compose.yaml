@@ -8,14 +8,16 @@ services:
     env_file:
       - ./backend/.env
     depends_on:
-      - db
+      db:
+        condition: service_healthy
       
   auth:
     build: ./auth
     ports:
       - "50051:50051"
     depends_on:
-      - backend
+      db:
+        condition: service_healthy
 
   db:
     image: postgres:15
@@ -24,7 +26,28 @@ services:
       - POSTGRES_PASSWORD=admin
       - POSTGRES_DB=comics
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U latte -d comics"]
+      test: ["CMD-SHELL", "pg_isready -U admin -d comics"]
       interval: 5s
       timeout: 5s
       retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@pg.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5055:80"
+    depends_on:
+      db:
+        condition: service_healthy
+  
+  migrate:
+    image: migrate/migrate
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend/migrations/:/migrations
+    command: ["-path", "/migrations/", "-database", "postgres://admin:admin@db:5432/comics?sslmode=disable", "up"]

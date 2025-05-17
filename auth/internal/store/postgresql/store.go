@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/likoscp/Advanced-Programming-2/auth/internal/configs"
+	_ "github.com/lib/pq"
 )
 
 type Store struct {

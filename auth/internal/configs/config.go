@@ -31,12 +31,19 @@ func NewConfig() *Config {
 	}
 
 	configServer := ConfigServer{}
+	configDb := ConfigDB{}
+
 
 	err = viper.Unmarshal(&configServer)
 	if err != nil {
 		log.Fatal("Environment can't be loaded: ", err)
 	}
+	err = viper.Unmarshal(&configDb)
+	if err != nil {
+		log.Fatal("Environment can't be loaded: ", err)
+	}
 	return &Config{
 		ConfigServer: &configServer,
+		ConfigDB: &configDb,
 	}
 }

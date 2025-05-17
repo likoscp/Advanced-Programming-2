@@ -16,7 +16,7 @@ func NewAuthRepository(store *postgresql.Store) *AuthRepository {
 }
 
 func (ar *AuthRepository) Create(u *models.User) (string, error) {
-	query := `INSERT INTO user(email, password) ($1, $2) RETURING id`
+	query := `INSERT INTO "user"(email, password) VALUES ($1, $2) RETURNING id`
 	id := ""
 	rows := ar.store.GetDB().QueryRow(query, u.Email, u.Password)
 	if rows.Err() != nil {
