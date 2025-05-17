@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8080:8080"
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - db
+      
+  auth:
+    build: ./auth
+    ports:
+      - "50051:50051"
+    depends_on:
+      - backend
+
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=comics
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U latte -d comics"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
