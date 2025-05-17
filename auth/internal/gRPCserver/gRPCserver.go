@@ -96,3 +96,50 @@ func (g *GRPCserver) IsAdmin(ctx context.Context, in *authv1.IsAdminRequest) (*a
 		IsAdmin: yes,
 	}, nil
 }
+
+func (g *GRPCserver) RegisterAdmin(ctx context.Context, in *authv1.RegisterRequest) (*authv1.RegisterResponse, error) {
+	user := &models.User{
+		Email:    in.GetEmail(),
+		Password: in.GetPassword(),
+	}
+
+	if err := user.IsValid(); err != nil {
+		slog.Warn("invalid email", "error", err)
+		return nil, err
+	}
+	if err := user.HashPassword(); err != nil {
+		slog.Warn("invalid password", "error", err)
+		return nil, err
+	}
+
+	id, err := g.authRepository.CreateAdmin(user)
+	if err != nil {
+		slog.Error("error to create user", "err", err)
+		return nil, err
+	}
+	user.ID = id
+
+	token, err := jwt.NewToken("SEX", *user, time.Hour*24)
+
+	return &authv1.RegisterResponse{Token: token}, nil
+}
+
+func (g *GRPCserver) LoginAdmin(ctx context.Context, in *authv1.LoginRequest) (*authv1.LoginResponse, error) {
+	user := &models.User{
+		Email: in.GetEmail(),
+		Password: in.GetPassword(),
+	}
+
+	user2, err := g.authRepository.GetAdmin(user.Email)
+	if err != nil {
+		slog.Error("error with db", "error", err)
+		return nil, err
+	}
+
+	if !user.ComparePassword(user2) {
+		return nil, fmt.Errorf("wadawdiorvoijhaevv[huQRNHNH[ERH[R]MJCEAVRB['0H0UJ9 J [IOJEW[IHESAH01`WLJJ.KZ,JLS;/Zk/; OK]]]]]")
+	}
+	token, err := jwt.NewToken("SEX", *user, time.Hour*24)
+
+	return &authv1.LoginResponse{Token: token}, nil
+}
