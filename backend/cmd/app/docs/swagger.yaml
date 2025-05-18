@@ -1,0 +1,141 @@
+definitions:
+  models.IsAdmin:
+    properties:
+      user-id:
+        type: string
+    type: object
+  models.IsReallyAdmin:
+    properties:
+      is-admin:
+        type: boolean
+    type: object
+  models.Token:
+    properties:
+      token:
+        type: string
+    type: object
+  models.User:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: This is a sample server Comics-viewer.
+  title: Swagger Store API
+  version: "1.0"
+paths:
+  /auth/is-admmin:
+    get:
+      consumes:
+      - application/json
+      description: is Admin?
+      parameters:
+      - description: getting
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.IsAdmin'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.IsReallyAdmin'
+      summary: is Admin?
+      tags:
+      - auth
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Login User
+      parameters:
+      - description: awdasd
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Token'
+      summary: Login User
+      tags:
+      - auth
+  /auth/login-admin:
+    post:
+      consumes:
+      - application/json
+      description: Login Admin
+      parameters:
+      - description: getting
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Token'
+      summary: Login Admin
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Register User
+      parameters:
+      - description: getting
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Token'
+      summary: Register User
+      tags:
+      - auth
+  /auth/register-admin:
+    post:
+      consumes:
+      - application/json
+      description: Register Admin
+      parameters:
+      - description: getting
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Token'
+      summary: Register Admin
+      tags:
+      - auth
+swagger: "2.0"
