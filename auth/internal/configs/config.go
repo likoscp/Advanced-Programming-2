@@ -12,7 +12,8 @@ type Config struct {
 }
 
 type ConfigServer struct {
-	Addr     string `mapstructure:"SERVER_ADDR"`
+	Addr   string `mapstructure:"SERVER_ADDR"`
+	Secret string `mapstructure:"SECRET"`
 }
 
 type ConfigDB struct {
@@ -33,7 +34,6 @@ func NewConfig() *Config {
 	configServer := ConfigServer{}
 	configDb := ConfigDB{}
 
-
 	err = viper.Unmarshal(&configServer)
 	if err != nil {
 		log.Fatal("Environment can't be loaded: ", err)
@@ -44,6 +44,6 @@ func NewConfig() *Config {
 	}
 	return &Config{
 		ConfigServer: &configServer,
-		ConfigDB: &configDb,
+		ConfigDB:     &configDb,
 	}
 }
