@@ -22,6 +22,7 @@ var (
 
 type GRPCserver struct {
 	authv1.UnimplementedAuthServer
+	config *configs.Config
 	authRepository *repository.AuthRepository
 }
 
@@ -32,6 +33,7 @@ func NEWgrpcserver(config *configs.Config) (*GRPCserver, error) {
 	}
 	authRepo := repository.NewAuthRepository(store)
 	return &GRPCserver{
+		config: config,
 		authRepository: authRepo,
 	}, nil
 }
@@ -58,7 +60,10 @@ func (g *GRPCserver) Register(ctx context.Context, in *authv1.RegisterRequest) (
 	}
 	user.ID = id
 
-	token, err := jwt.NewToken("SEX", *user, time.Hour*24)
+	token, err := jwt.NewToken(g.config.ConfigServer.Secret, *user, time.Hour*24)
+	if err != nil {
+		return nil, err
+	}
 
 	return &authv1.RegisterResponse{Token: token}, nil
 }
@@ -79,7 +84,10 @@ func (g *GRPCserver) Login(ctx context.Context, in *authv1.LoginRequest) (*authv
 	if !user.ComparePassword(user2) {
 		return nil, fmt.Errorf("wadawdiorvoijhaevv[huQRNHNH[ERH[R]MJCEAVRB['0H0UJ9 J [IOJEW[IHESAH01`WLJJ.KZ,JLS;/Zk/; OK]]]]]")
 	}
-	token, err := jwt.NewToken("SEX", *user, time.Hour*24)
+	token, err := jwt.NewToken(g.config.ConfigServer.Secret, *user, time.Hour*24)
+	if err != nil {
+		return nil, err
+	}
 
 	return &authv1.LoginResponse{Token: token}, nil
 }
@@ -119,7 +127,10 @@ func (g *GRPCserver) RegisterAdmin(ctx context.Context, in *authv1.RegisterReque
 	}
 	user.ID = id
 
-	token, err := jwt.NewToken("SEX", *user, time.Hour*24)
+	token, err := jwt.NewToken(g.config.ConfigServer.Secret, *user, time.Hour*24)
+	if err != nil {
+		return nil, err
+	}
 
 	return &authv1.RegisterResponse{Token: token}, nil
 }
@@ -139,7 +150,10 @@ func (g *GRPCserver) LoginAdmin(ctx context.Context, in *authv1.LoginRequest) (*
 	if !user.ComparePassword(user2) {
 		return nil, fmt.Errorf("wadawdiorvoijhaevv[huQRNHNH[ERH[R]MJCEAVRB['0H0UJ9 J [IOJEW[IHESAH01`WLJJ.KZ,JLS;/Zk/; OK]]]]]")
 	}
-	token, err := jwt.NewToken("SEX", *user, time.Hour*24)
+	token, err := jwt.NewToken(g.config.ConfigServer.Secret, *user, time.Hour*24)
+	if err != nil {
+		return nil, err
+	}
 
 	return &authv1.LoginResponse{Token: token}, nil
 }
