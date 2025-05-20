@@ -183,7 +183,7 @@ func (a *AuthHandler) LoginAdmin() http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		response.ResponseJSON(w, http.StatusOK, map[string]string{"token": res.Token})
+		response.ResponseJSON(w, http.StatusOK,models.Token{Token: res.Token})
 	}
 }
 
