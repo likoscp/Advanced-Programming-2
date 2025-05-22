@@ -1,9 +1,4 @@
 definitions:
-  models.IsAdmin:
-    properties:
-      user-id:
-        type: string
-    type: object
   models.IsReallyAdmin:
     properties:
       is-admin:
@@ -20,6 +15,17 @@ definitions:
         type: string
       password:
         type: string
+      username:
+        type: string
+    type: object
+  models.UserInfoResponse:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
     type: object
 host: localhost:8080
 info:
@@ -28,18 +34,17 @@ info:
   title: Swagger Store API
   version: "1.0"
 paths:
-  /auth/is-admmin:
+  /auth/is-admin/{id}:
     get:
       consumes:
       - application/json
       description: is Admin?
       parameters:
-      - description: getting
-        in: body
-        name: request
+      - description: id
+        in: path
+        name: id
         required: true
-        schema:
-          $ref: '#/definitions/models.IsAdmin'
+        type: integer
       produces:
       - application/json
       responses:
@@ -136,6 +141,27 @@ paths:
           schema:
             $ref: '#/definitions/models.Token'
       summary: Register Admin
+      tags:
+      - auth
+  /auth/user-info/{id}:
+    get:
+      consumes:
+      - application/json
+      description: user info
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.UserInfoResponse'
+      summary: user info
       tags:
       - auth
 swagger: "2.0"

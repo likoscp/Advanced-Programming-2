@@ -7,6 +7,7 @@ import (
 
 type User struct {
 	ID       string
+	Username string `validate:"required,min=5,max=35"`
 	Password string `validate:"required,min=5,max=25"`
 	Email    string `validate:"required,email"`
 }

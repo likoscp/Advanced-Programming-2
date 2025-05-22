@@ -15,7 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/auth/is-admmin": {
+        "/auth/is-admin/{id}": {
             "get": {
                 "description": "is Admin?",
                 "consumes": [
@@ -30,13 +30,11 @@ const docTemplate = `{
                 "summary": "is Admin?",
                 "parameters": [
                     {
-                        "description": "getting",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.IsAdmin"
-                        }
+                        "type": "integer",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -184,17 +182,41 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/auth/user-info/{id}": {
+            "get": {
+                "description": "user info",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "user info",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.UserInfoResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
-        "models.IsAdmin": {
-            "type": "object",
-            "properties": {
-                "user-id": {
-                    "type": "string"
-                }
-            }
-        },
         "models.IsReallyAdmin": {
             "type": "object",
             "properties": {
@@ -218,6 +240,23 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.UserInfoResponse": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "username": {
                     "type": "string"
                 }
             }

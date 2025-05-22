@@ -24,7 +24,7 @@ require (
 )
 
 require (
-	github.com/barcek2281/finalProto v0.0.0-20250517065545-a223689fbc6a
+	github.com/barcek2281/finalProto v0.0.0-20250522050455-1a8326131ae4
 	github.com/fsnotify/fsnotify v1.8.0 // indirect
 	github.com/go-viper/mapstructure/v2 v2.2.1 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.3 // indirect
