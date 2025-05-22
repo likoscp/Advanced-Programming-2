@@ -32,9 +32,10 @@ func NewAuthHandler(config *config.Config) (*AuthHandler, error) {
 func (a *AuthHandler) Configure(mux *http.ServeMux) {
 	mux.HandleFunc("POST /auth/login", a.Login())
 	mux.HandleFunc("POST /auth/register", a.Register())
-	mux.HandleFunc("GET /auth/is-admin", a.IsAdmin())
+	mux.HandleFunc("GET /auth/is-admin/{id}", a.IsAdmin())
 	mux.HandleFunc("POST /auth/login-admin", a.LoginAdmin())
 	mux.HandleFunc("POST /auth/register-admin", a.RegisterAdmin())
+	mux.HandleFunc("GET /auth/user-info/{id}", a.UserInfo())
 }
 
 // Login Login User
@@ -48,7 +49,6 @@ func (a *AuthHandler) Configure(mux *http.ServeMux) {
 //	@Success		200		{object}	models.Token
 //	@Router			/auth/login [post]
 func (a *AuthHandler) Login() http.HandlerFunc {
-	// type M
 	return func(w http.ResponseWriter, r *http.Request) {
 		user := models.User{}
 
@@ -85,12 +85,8 @@ func (a *AuthHandler) Login() http.HandlerFunc {
 //	@Success		200		{object}	models.Token
 //	@Router			/auth/register [post]
 func (a *AuthHandler) Register() http.HandlerFunc {
-	type User struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
-	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		user := User{}
+		user := models.User{}
 
 		if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
 			slog.Warn("error to json", "error", err)
@@ -99,6 +95,7 @@ func (a *AuthHandler) Register() http.HandlerFunc {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
 		defer cancel()
 		res, err := a.AuthClient.Register(ctx, &authv1.RegisterRequest{
+			Username: user.Username,
 			Email:    user.Email,
 			Password: user.Password,
 		})
@@ -121,24 +118,19 @@ func (a *AuthHandler) Register() http.HandlerFunc {
 //	@Tags			auth
 //	@Accept			json
 //	@Produce		json
-//	@Param			request	body		models.IsAdmin	true	"getting"
+//	@Param			id	path		int	true	"id"
 //	@Success		200		{object}	models.IsReallyAdmin
-//	@Router			/auth/is-admmin [get]
+//	@Router			/auth/is-admin/{id} [get]
 func (a *AuthHandler) IsAdmin() http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
-		req := models.IsAdmin{}
+		id := r.PathValue("id")
 
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-			slog.Warn("lox", "error", err)
-			response.ResponseError(w, http.StatusBadRequest, err)
-			return
-		}
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
 		defer cancel()
 
 		res, err := a.AuthClient.IsAdmin(ctx, &authv1.IsAdminRequest{
-			UserId: req.UserId,
+			UserId: id,
 		})
 		if err != nil {
 			slog.Warn("lox", "error", err)
@@ -208,6 +200,7 @@ func (a *AuthHandler) RegisterAdmin() http.HandlerFunc {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
 		defer cancel()
 		res, err := a.AuthClient.RegisterAdmin(ctx, &authv1.RegisterRequest{
+			Username: user.Username,
 			Email:    user.Email,
 			Password: user.Password,
 		})
@@ -220,5 +213,30 @@ func (a *AuthHandler) RegisterAdmin() http.HandlerFunc {
 
 		response.ResponseJSON(w, http.StatusOK, map[string]string{"token": res.Token})
 
+	}
+}
+// UserInfo user info
+//
+//	@Summary		user info
+//	@Description	user info
+//	@Tags			auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path		int	true	"id"
+//	@Success		200		{object}	models.UserInfoResponse
+//	@Router			/auth/user-info/{id} [get]
+func (a *AuthHandler) UserInfo() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id := r.PathValue("id")
+
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
+		defer cancel()
+		res, err := a.AuthClient.GetInfoUser(ctx, &authv1.UserInfoRequest{UserId: id})
+		if err != nil {
+			response.ResponseError(w, http.StatusBadRequest, err)
+			slog.Warn("error to json", "error", err)
+			return
+		}
+		response.ResponseJSON(w, http.StatusAccepted, res)
 	}
 }

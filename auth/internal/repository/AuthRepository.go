@@ -19,9 +19,9 @@ func NewAuthRepository(store *postgresql.Store) *AuthRepository {
 }
 
 func (ar *AuthRepository) Create(u *models.User) (string, error) {
-	query := `INSERT INTO "user"(email, password) VALUES ($1, $2) RETURNING id`
+	query := `INSERT INTO "user"(email, username, password) VALUES ($1, $2, $3) RETURNING id`
 	id := ""
-	rows := ar.store.GetDB().QueryRow(query, u.Email, u.Password)
+	rows := ar.store.GetDB().QueryRow(query, u.Email, u.Username, u.Password)
 	if rows.Err() != nil {
 		return "", rows.Err()
 	}
@@ -30,6 +30,16 @@ func (ar *AuthRepository) Create(u *models.User) (string, error) {
 	}
 
 	return id, nil
+}
+func (ar *AuthRepository) GetById(id string) (models.User, error) {
+	u := models.User{ID: id}
+	query := `SELECT username, email FROM "user" WHERE id = $1`
+
+	row := ar.store.GetDB().QueryRow(query, u.ID)
+	if err := row.Scan(&u.Username, &u.Email); err != nil {
+		return u, err
+	}
+	return u, nil
 }
 
 func (ar *AuthRepository) Get(email string) (models.User, error) {
@@ -43,6 +53,7 @@ func (ar *AuthRepository) Get(email string) (models.User, error) {
 	return u, nil
 }
 func (ar *AuthRepository) GetAdminId(id string) (bool, error) {
+
 	query := `SELECT id FROM "admin" WHERE id = $1`
 
 	var adminID string
@@ -58,9 +69,9 @@ func (ar *AuthRepository) GetAdminId(id string) (bool, error) {
 }
 
 func (ar *AuthRepository) CreateAdmin(u *models.User) (string, error) {
-	query := `INSERT INTO "admin"(email, password) VALUES ($1, $2) RETURNING id`
+	query := `INSERT INTO "admin"(email, username, password) VALUES ($1, $2, $3) RETURNING id`
 	id := ""
-	rows := ar.store.GetDB().QueryRow(query, u.Email, u.Password)
+	rows := ar.store.GetDB().QueryRow(query, u.Email, u.Username, u.Password)
 	if rows.Err() != nil {
 		return "", rows.Err()
 	}
@@ -70,7 +81,6 @@ func (ar *AuthRepository) CreateAdmin(u *models.User) (string, error) {
 
 	return id, nil
 }
-
 
 func (ar *AuthRepository) GetAdmin(email string) (models.User, error) {
 	query := `SELECT id, password FROM "admin" WHERE email = $1`

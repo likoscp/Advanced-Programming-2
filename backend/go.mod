@@ -5,7 +5,7 @@ go 1.23.0
 toolchain go1.24.2
 
 require (
-	github.com/barcek2281/finalProto v0.0.0-20250517065545-a223689fbc6a
+	github.com/barcek2281/finalProto v0.0.0-20250522050455-1a8326131ae4
 	github.com/spf13/viper v1.20.1
 	google.golang.org/grpc v1.72.1
 )

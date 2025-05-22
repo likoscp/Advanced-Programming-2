@@ -1,5 +1,7 @@
 github.com/barcek2281/finalProto v0.0.0-20250517065545-a223689fbc6a h1:qTWk5x2E/E+Vmg3ggfWhlJzuVNoUtgAdIcDktggzR00=
 github.com/barcek2281/finalProto v0.0.0-20250517065545-a223689fbc6a/go.mod h1:0XuJZyrwTnKykn+riAAovtTDjMPVxZXNP4Q/NrcQK9M=
+github.com/barcek2281/finalProto v0.0.0-20250522050455-1a8326131ae4 h1:v6vESQMGAyajtM6IRIixHw9LzAOrz4ywlW79XZDw5rk=
+github.com/barcek2281/finalProto v0.0.0-20250522050455-1a8326131ae4/go.mod h1:RdtbUPxlMxFCAlt1SEAIpB6ER9dgmBHeSoKveqkEAI4=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

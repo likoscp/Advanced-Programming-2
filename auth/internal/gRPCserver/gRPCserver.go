@@ -15,6 +15,11 @@ import (
 	"github.com/likoscp/Advanced-Programming-2/auth/models"
 )
 
+const (
+	adminRole = "admin"
+	userRole  = "user"
+)
+
 var (
 	ErrNotValidEmail    = errors.New("invalid email")
 	ErrNotValidPassword = errors.New("invalid password")
@@ -22,7 +27,7 @@ var (
 
 type GRPCserver struct {
 	authv1.UnimplementedAuthServer
-	config *configs.Config
+	config         *configs.Config
 	authRepository *repository.AuthRepository
 }
 
@@ -33,7 +38,7 @@ func NEWgrpcserver(config *configs.Config) (*GRPCserver, error) {
 	}
 	authRepo := repository.NewAuthRepository(store)
 	return &GRPCserver{
-		config: config,
+		config:         config,
 		authRepository: authRepo,
 	}, nil
 }
@@ -42,6 +47,7 @@ func (g *GRPCserver) Register(ctx context.Context, in *authv1.RegisterRequest) (
 	user := &models.User{
 		Email:    in.GetEmail(),
 		Password: in.GetPassword(),
+		Username: in.GetUsername(),
 	}
 
 	if err := user.IsValid(); err != nil {
@@ -60,18 +66,19 @@ func (g *GRPCserver) Register(ctx context.Context, in *authv1.RegisterRequest) (
 	}
 	user.ID = id
 
-	token, err := jwt.NewToken(g.config.ConfigServer.Secret, *user, time.Hour*24)
+	token, err := jwt.NewToken(g.config.ConfigServer.Secret, userRole, *user, time.Hour*24)
 	if err != nil {
 		return nil, err
 	}
 
 	return &authv1.RegisterResponse{Token: token}, nil
 }
+
 // UNIT TESTS
 
 func (g *GRPCserver) Login(ctx context.Context, in *authv1.LoginRequest) (*authv1.LoginResponse, error) {
 	user := &models.User{
-		Email: in.GetEmail(),
+		Email:    in.GetEmail(),
 		Password: in.GetPassword(),
 	}
 
@@ -82,9 +89,9 @@ func (g *GRPCserver) Login(ctx context.Context, in *authv1.LoginRequest) (*authv
 	}
 
 	if !user.ComparePassword(user2) {
-		return nil, fmt.Errorf("wadawdiorvoijhaevv[huQRNHNH[ERH[R]MJCEAVRB['0H0UJ9 J [IOJEW[IHESAH01`WLJJ.KZ,JLS;/Zk/; OK]]]]]")
+		return nil, fmt.Errorf("password doesnt match")
 	}
-	token, err := jwt.NewToken(g.config.ConfigServer.Secret, *user, time.Hour*24)
+	token, err := jwt.NewToken(g.config.ConfigServer.Secret, userRole, *user, time.Hour*24)
 	if err != nil {
 		return nil, err
 	}
@@ -109,6 +116,7 @@ func (g *GRPCserver) RegisterAdmin(ctx context.Context, in *authv1.RegisterReque
 	user := &models.User{
 		Email:    in.GetEmail(),
 		Password: in.GetPassword(),
+		Username: in.GetUsername(),
 	}
 
 	if err := user.IsValid(); err != nil {
@@ -127,7 +135,7 @@ func (g *GRPCserver) RegisterAdmin(ctx context.Context, in *authv1.RegisterReque
 	}
 	user.ID = id
 
-	token, err := jwt.NewToken(g.config.ConfigServer.Secret, *user, time.Hour*24)
+	token, err := jwt.NewToken(g.config.ConfigServer.Secret, adminRole, *user, time.Hour*24)
 	if err != nil {
 		return nil, err
 	}
@@ -137,7 +145,7 @@ func (g *GRPCserver) RegisterAdmin(ctx context.Context, in *authv1.RegisterReque
 
 func (g *GRPCserver) LoginAdmin(ctx context.Context, in *authv1.LoginRequest) (*authv1.LoginResponse, error) {
 	user := &models.User{
-		Email: in.GetEmail(),
+		Email:    in.GetEmail(),
 		Password: in.GetPassword(),
 	}
 
@@ -148,12 +156,26 @@ func (g *GRPCserver) LoginAdmin(ctx context.Context, in *authv1.LoginRequest) (*
 	}
 
 	if !user.ComparePassword(user2) {
-		return nil, fmt.Errorf("wadawdiorvoijhaevv[huQRNHNH[ERH[R]MJCEAVRB['0H0UJ9 J [IOJEW[IHESAH01`WLJJ.KZ,JLS;/Zk/; OK]]]]]")
+		return nil, fmt.Errorf("wadawdiorv; password doesnt match]]]]]")
 	}
-	token, err := jwt.NewToken(g.config.ConfigServer.Secret, *user, time.Hour*24)
+	token, err := jwt.NewToken(g.config.ConfigServer.Secret, adminRole, *user, time.Hour*24)
 	if err != nil {
 		return nil, err
 	}
 
 	return &authv1.LoginResponse{Token: token}, nil
+}
+
+func (g *GRPCserver) GetInfoUser(ctx context.Context, in *authv1.UserInfoRequest) (*authv1.UserInfoResponse, error) {
+
+	user, err := g.authRepository.GetById(in.UserId)
+	if err != nil {
+
+		return nil, err
+	}
+
+	return &authv1.UserInfoResponse{
+		Email:    user.Email,
+		Username: user.Username,
+	}, nil
 }
