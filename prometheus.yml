@@ -1,0 +1,7 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'email-service'
+    static_configs:
+      - targets: ['email-service:8082']

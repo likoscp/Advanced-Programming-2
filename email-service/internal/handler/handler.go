@@ -6,6 +6,9 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+
 	"email-service/internal/db"
 	"email-service/internal/service"
 	emailv1 "github.com/barcek2281/finalProto/gen/go/email"
@@ -36,6 +39,7 @@ func SetupRoutes(es *service.EmailService, client *db.PostgresClient) http.Handl
 	h := NewHandler(es, client)
 	router := http.NewServeMux()
 	router.HandleFunc("POST /mail/register", h.Register)
+	router.Handle("/metrics", promhttp.Handler()) // Added metrics endpoint
 	return router
 }
 
@@ -64,6 +68,9 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to send email", http.StatusInternalServerError)
 		return
 	}
+
+	// Increment email sent counter
+	emailSentCounter.Inc()
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("User registered successfully and email sent"))
@@ -100,10 +107,29 @@ func (s *GRPCServer) NotifyComicUploaded(ctx context.Context, req *emailv1.Notif
 			log.Printf("Failed to send email to %s: %v", email, err)
 			continue
 		}
+		// Increment email sent counter
+		emailSentCounter.Inc()
 		log.Printf("Successfully sent email to %s", email)
 	}
 
 	return &emailv1.NotifyComicUploadedResponse{
 		Message: "Emails sent successfully",
 	}, nil
+}
+
+// Metrics initialization
+var (
+	emailSentCounter = prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "email_sent_total",
+		Help: "Total number of emails sent.",
+	})
+	natsMessagesProcessed = prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "nats_messages_processed_total",
+		Help: "Total number of NATS messages processed.",
+	})
+)
+
+func init() {
+	prometheus.MustRegister(emailSentCounter)
+	prometheus.MustRegister(natsMessagesProcessed)
 }

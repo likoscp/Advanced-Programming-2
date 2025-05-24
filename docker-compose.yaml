@@ -60,8 +60,34 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8082/metrics" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   nats:
     image: nats:latest
     ports:
       - "4222:4222"
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    depends_on:
+      email-service:
+        condition: service_healthy
+
+  grafana:
+      image: grafana/grafana:latest
+      ports:
+        - "3001:3000"
+      env_file:
+        - ./email-service/.env
+      depends_on:
+        - prometheus

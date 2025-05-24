@@ -4,11 +4,14 @@ import (
 	"encoding/json"
 	"log"
 
+	"github.com/nats-io/nats.go"
+	"github.com/prometheus/client_golang/prometheus"
+
 	"email-service/internal/db"
 	"email-service/internal/service"
-	"github.com/nats-io/nats.go"
 )
 
+// ComicUploadedEvent represents the structure of the comic.uploaded event
 type ComicUploadedEvent struct {
 	ComicID     string `json:"comic_id"`
 	Title       string `json:"title"`
@@ -16,19 +19,20 @@ type ComicUploadedEvent struct {
 	Description string `json:"description"`
 }
 
+// NATSClient handles NATS subscriptions
 type NATSClient struct {
 	Conn         *nats.Conn
 	DBClient     *db.PostgresClient
 	EmailService *service.EmailService
 }
 
-func NewNATSClient(natsURL string, dbClient *db.PostgresClient, emailService *service.EmailService) (*NATSClient, error) {
-	nc, err := nats.Connect(natsURL)
+func NewNATSClient(url string, dbClient *db.PostgresClient, emailService *service.EmailService) (*NATSClient, error) {
+	conn, err := nats.Connect(url)
 	if err != nil {
 		return nil, err
 	}
 	return &NATSClient{
-		Conn:         nc,
+		Conn:         conn,
 		DBClient:     dbClient,
 		EmailService: emailService,
 	}, nil
@@ -41,6 +45,12 @@ func (nc *NATSClient) SubscribeComicUploaded() error {
 			log.Printf("Failed to unmarshal comic uploaded event: %v", err)
 			return
 		}
+
+		// Increment NATS messages processed counter (defined in main.go)
+		prometheus.NewCounter(prometheus.CounterOpts{
+			Name: "nats_messages_processed_total",
+			Help: "Total number of NATS messages processed",
+		}).Inc()
 
 		// Fetch all users
 		users, err := nc.DBClient.GetAllUsers()
