@@ -6,7 +6,6 @@ import (
 	"strconv"
 )
 
-// Config holds configuration for the email microservice
 type Config struct {
 	Addr         string
 	SMTPHost     string
@@ -18,9 +17,10 @@ type Config struct {
 	DBUser       string
 	DBPassword   string
 	DBName       string
+	NATSURL      string
+	GRPCAddr     string
 }
 
-// LoadConfig loads environment variables into Config
 func LoadConfig() (*Config, error) {
 	addr := os.Getenv("ADDR")
 	smtpHost := os.Getenv("SMTP_HOST")
@@ -32,9 +32,11 @@ func LoadConfig() (*Config, error) {
 	dbUser := os.Getenv("DB_USER")
 	dbPassword := os.Getenv("DB_PASSWORD")
 	dbName := os.Getenv("DB_NAME")
+	natsURL := os.Getenv("NATS_URL")
+	grpcAddr := os.Getenv("GRPC_ADDR")
 
 	if addr == "" || smtpHost == "" || smtpPortStr == "" || smtpEmail == "" || smtpPassword == "" ||
-		dbHost == "" || dbAddr == "" || dbUser == "" || dbPassword == "" || dbName == "" {
+		dbHost == "" || dbAddr == "" || dbUser == "" || dbPassword == "" || dbName == "" || natsURL == "" || grpcAddr == "" {
 		log.Fatal("Missing required environment variables")
 	}
 
@@ -54,5 +56,7 @@ func LoadConfig() (*Config, error) {
 		DBUser:       dbUser,
 		DBPassword:   dbPassword,
 		DBName:       dbName,
+		NATSURL:      natsURL,
+		GRPCAddr:     grpcAddr,
 	}, nil
 }

@@ -50,3 +50,18 @@ services:
     volumes:
       - ./backend/migrations/:/migrations
     command: ["-path", "/migrations/", "-database", "postgres://admin:admin@db:5432/comics?sslmode=disable", "up"]
+
+  email-service:
+    build: ./email-service
+    ports:
+      - "8082:8082"
+    env_file:
+      - ./email-service/.env
+    depends_on:
+      db:
+        condition: service_healthy
+
+  nats:
+    image: nats:latest
+    ports:
+      - "4222:4222"

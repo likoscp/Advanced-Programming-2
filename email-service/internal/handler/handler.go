@@ -1,12 +1,14 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"net/http"
 
 	"email-service/internal/db"
 	"email-service/internal/service"
+	emailv1 "github.com/barcek2281/finalProto/gen/go/email"
 )
 
 // Request represents the incoming JSON payload
@@ -66,4 +68,42 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("User registered successfully and email sent"))
 	log.Printf("Successfully sent email to %s", req.Email)
+}
+
+type GRPCServer struct {
+	emailv1.UnimplementedEmailServiceServer
+	DBClient     *db.PostgresClient
+	EmailService *service.EmailService
+}
+
+func NewGRPCServer(dbClient *db.PostgresClient, emailService *service.EmailService) *GRPCServer {
+	return &GRPCServer{
+		DBClient:     dbClient,
+		EmailService: emailService,
+	}
+}
+
+func (s *GRPCServer) NotifyComicUploaded(ctx context.Context, req *emailv1.NotifyComicUploadedRequest) (*emailv1.NotifyComicUploadedResponse, error) {
+	// Fetch all users
+	users, err := s.DBClient.GetAllUsers()
+	if err != nil {
+		log.Printf("Failed to fetch users: %v", err)
+		return nil, err
+	}
+
+	// Send email to each user
+	subject := "New Comic Uploaded!"
+	body := `<h1>New Comic Available!</h1><p>A new comic titled "` + req.Title + `" by ` + req.Author + ` has been uploaded.</p><p>Description: ` + req.Description + `</p>`
+	for _, user := range users {
+		email := user["email"].(string)
+		if err := s.EmailService.SendEmail(email, subject, body); err != nil {
+			log.Printf("Failed to send email to %s: %v", email, err)
+			continue
+		}
+		log.Printf("Successfully sent email to %s", email)
+	}
+
+	return &emailv1.NotifyComicUploadedResponse{
+		Message: "Emails sent successfully",
+	}, nil
 }

@@ -1,10 +1,13 @@
 package grpcserver
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
+	"net/http"
 	"time"
 
 	authv1 "github.com/barcek2281/finalProto/gen/go/auth"
@@ -69,6 +72,23 @@ func (g *GRPCserver) Register(ctx context.Context, in *authv1.RegisterRequest) (
 	token, err := jwt.NewToken(g.config.ConfigServer.Secret, userRole, *user, time.Hour*24)
 	if err != nil {
 		return nil, err
+	}
+
+	// Send registration event to email microservice
+	emailReq := map[string]string{
+		"username": user.Username,
+		"email":    user.Email,
+	}
+	reqBody, _ := json.Marshal(emailReq)
+	resp, err := http.Post("http://email-service:8082/mail/register", "application/json", bytes.NewBuffer(reqBody))
+	if err != nil {
+		slog.Warn("failed to notify email service", "error", err)
+		// Continue even if email fails to avoid blocking registration
+	} else {
+		defer resp.Body.Close()
+		if resp.StatusCode != http.StatusOK {
+			slog.Warn("email service returned non-OK status", "status", resp.StatusCode)
+		}
 	}
 
 	return &authv1.RegisterResponse{Token: token}, nil
