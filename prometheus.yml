@@ -5,3 +5,6 @@ scrape_configs:
   - job_name: 'email-service'
     static_configs:
       - targets: ['email-service:8082']
+  - job_name: 'auth'
+    static_configs:
+      - targets: ['auth:8083']

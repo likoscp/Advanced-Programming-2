@@ -14,9 +14,17 @@ services:
     build: ./auth
     ports:
       - "50051:50051"
+      - "8083:8083"
+    env_file:
+      - ./auth/.env
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8083/metrics" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   db:
     image: postgres:15
