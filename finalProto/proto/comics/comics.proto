@@ -1,0 +1,128 @@
+syntax = "proto3";
+
+package comics;
+
+option go_package = "likoscp.comics.v1;comicsv1";
+
+service ComicsService {
+  rpc CreateComic(CreateComicRequest) returns (CreateComicResponse);
+  rpc GetComicByID(GetComicByIDRequest) returns (Comic);
+  rpc ListComics(Empty) returns (ComicList);
+  rpc UpdateComic(UpdateComicRequest) returns (Empty);
+  rpc DeleteComic(DeleteComicRequest) returns (Empty);
+}
+
+message AltTitle {
+  string id = 1;
+  string title = 2;
+}
+
+message Genre {
+  string id = 1;
+  string name = 2;
+}
+
+message Page {
+  string id = 1;
+  string chapter_id = 2;
+  string image_url = 3;
+  int32 page_num = 4;
+}
+
+message Reply {
+  string id = 1;
+  string comment_id = 2;
+  string user_id = 3;
+  string user_name = 4;
+  string reply = 5;
+  string created_at = 6; 
+  int32 likes = 7;
+  int32 dislikes = 8;
+}
+
+message Comment {
+  string id = 1;
+  string page_id = 2;
+  string user_id = 3;
+  string user_name = 4;
+  string comment = 5;
+  string created_at = 6; 
+  repeated Reply replies = 7;
+  int32 likes = 8;
+  int32 dislikes = 9;
+}
+
+message Chapter {
+  string id = 1;
+  string comic_id = 2;
+  string title = 3;
+  double number = 4;
+  repeated Page pages = 5;
+  string created_at = 6;
+  int32 likes = 7;
+  int32 dislikes = 8;
+}
+
+message Comic {
+  string id = 1;
+  string author_id = 2;
+  string translator_id = 3;
+  string artist_id = 4;
+  string title = 5;
+  repeated AltTitle alt_titles = 6;
+  string description = 7;
+  string cover_image = 8;
+  repeated Genre genres = 9;
+  string status = 10;
+  string comic_release_date = 11;
+  string created_at = 12;
+  string updated_at = 13;
+  int32 views = 14;
+  double rating = 15;
+  repeated Chapter chapters = 16;
+}
+
+
+message CreateComicRequest {
+  string author_id = 1;
+  string translator_id = 2;
+  string artist_id = 3;
+  string title = 4;
+  string description = 5;
+  string cover_image = 6;
+  repeated string genre_ids = 7;
+  string status = 8;
+  string comic_release_date = 9;
+}
+
+message CreateComicResponse {
+  string id = 1;
+}
+
+message GetComicByIDRequest {
+  string id = 1;
+}
+
+message ComicList {
+  repeated Comic comics = 1;
+}
+
+message Empty {}
+
+message UpdateComicRequest {
+  string id = 1;
+  string author_id = 2;
+  string translator_id = 3;
+  string artist_id = 4;
+  string title = 5;
+  string description = 6;
+  string cover_image = 7;
+  int32 rating = 8;
+  string status = 9;
+  string comic_release_date = 10;
+  int32 views = 11;
+}
+
+message DeleteComicRequest {
+  string id = 1;
+}

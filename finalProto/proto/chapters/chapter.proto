@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+package chapters;
+
+option go_package = "likoscp.chapters.v1;chaptersv1";
+
+message Page {
+  string id = 1;
+  string image_url = 2;
+  int32 page_num = 3;
+}
+
+message Chapter {
+  string id = 1;
+  string title = 2;
+  int32 number = 3;
+  int32 likes = 4;
+  int32 dislikes = 5;
+  string created_at = 6;
+  repeated Page pages = 7;
+  string comic_id = 8;
+}
+
+message CreateChapterRequest {
+  string title = 1;
+  int32 number = 2;
+  int32 likes = 3;
+  int32 dislikes = 4;
+  uint32 comic_id = 5;
+}
+
+message CreateChapterResponse {
+  string id = 1;
+}
+
+message GetChapterByIDRequest {
+  string id = 1;
+}
+
+message ChapterList {
+  repeated Chapter chapters = 1;
+}
+
+message UpdateChapterRequest {
+  string id = 1;
+  string title = 2;
+  int32 number = 3;
+  int32 likes = 4;
+  int32 dislikes = 5;
+  uint32 comic_id = 6;
+}
+
+message DeleteChapterRequest {
+  string id = 1;
+}
+
+message AddPageRequest {
+  string chapter_id = 1;
+  string image_url = 2;
+  int32 page_num = 3;
+}
+
+message AddPageResponse {
+  string id = 1;
+}
+
+service ChaptersService {
+  rpc CreateChapter(CreateChapterRequest) returns (CreateChapterResponse);
+  rpc GetChapterByID(GetChapterByIDRequest) returns (Chapter);
+  rpc ListChapters(Empty) returns (ChapterList);
+  rpc UpdateChapter(UpdateChapterRequest) returns (Empty);
+  rpc DeleteChapter(DeleteChapterRequest) returns (Empty);
+  rpc AddPage(AddPageRequest) returns (AddPageResponse);
+}
+message Empty {}
