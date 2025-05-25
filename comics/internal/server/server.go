@@ -2,15 +2,12 @@ package server
 
 import (
 	"fmt"
-
-	// "github.com/likoscp/finalAddProgramming/producer/pkg/nats"
 	"github.com/likoscp/finalAddProgramming/comics/internal/config"
 	grpcCustom "github.com/likoscp/finalAddProgramming/comics/internal/grpc"
 	"github.com/likoscp/finalAddProgramming/comics/internal/repository"
 	"github.com/likoscp/finalAddProgramming/comics/internal/service"
-
-	comicsPb "github.com/likoscp/finalAddProgramming/finalProto/gen/go/comics"
 	chaptersPb "github.com/likoscp/finalAddProgramming/finalProto/gen/go/chapters"
+	comicsPb "github.com/likoscp/finalAddProgramming/finalProto/gen/go/comics"
 
 	"log"
 	"net"
@@ -69,9 +66,8 @@ func (s *Server) StartGRPC() error {
 	// 	log.Fatalf("failed to create NATS publisher: %v", err)
 	// }
 
-	comicGRPC := grpcCustom.NewComicGRPCHandler(comicService) 
+	comicGRPC := grpcCustom.NewComicGRPCHandler(comicService)
 	comicsPb.RegisterComicsServiceServer(s.grpcServer, comicGRPC)
-
 
 	chapterGRPC := grpcCustom.NewChapterGRPCHandler(service.NewChaptersService(repository.NewChapterRepository(db)))
 	chaptersPb.RegisterChaptersServiceServer(s.grpcServer, chapterGRPC)
