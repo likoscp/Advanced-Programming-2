@@ -9,6 +9,8 @@ import (
 	"time"
 
 	authv1 "github.com/barcek2281/finalProto/gen/go/auth"
+	"github.com/go-redis/redis/v8"
+	"github.com/likoscp/Advanced-Programming-2/backend/internal/cache"
 	"github.com/likoscp/Advanced-Programming-2/backend/internal/config"
 	"github.com/likoscp/Advanced-Programming-2/backend/internal/lib/response"
 	"github.com/likoscp/Advanced-Programming-2/backend/models"
@@ -18,6 +20,7 @@ import (
 
 type AuthHandler struct {
 	AuthClient authv1.AuthClient
+	cache      *redis.Client
 }
 
 func NewAuthHandler(config *config.Config) (*AuthHandler, error) {
@@ -26,6 +29,7 @@ func NewAuthHandler(config *config.Config) (*AuthHandler, error) {
 	authClient := authv1.NewAuthClient(conn)
 	return &AuthHandler{
 		AuthClient: authClient,
+		cache: cache.NewRedisClient(config),
 	}, err
 }
 
@@ -60,14 +64,27 @@ func (a *AuthHandler) Login() http.HandlerFunc {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
 		defer cancel()
 
+		_, err := a.cache.Get(ctx, user.Email).Result()
+
+		if err == nil {
+			slog.Error("error to auth", "error", fmt.Errorf("cannot login"))
+			response.ResponseError(w, http.StatusInternalServerError, fmt.Errorf("you cannot login lol"))
+
+			return
+		}
+
 		res, err := a.AuthClient.Login(ctx, &authv1.LoginRequest{
 			Email:    user.Email,
 			Password: user.Password,
 		})
 
 		if err != nil {
-			slog.Error("error to auth", "error", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			ctx, cancel = context.WithTimeout(context.Background(), 60*time.Second)
+			defer cancel()
+
+			a.cache.Set(ctx, user.Email, []byte("0"), time.Minute*5)
+			slog.Info("set data for redis")
+			response.ResponseError(w, http.StatusInternalServerError, err)
 			return
 		}
 		response.ResponseJSON(w, http.StatusOK, models.Token{Token: res.Token})
@@ -175,7 +192,7 @@ func (a *AuthHandler) LoginAdmin() http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		response.ResponseJSON(w, http.StatusOK,models.Token{Token: res.Token})
+		response.ResponseJSON(w, http.StatusOK, models.Token{Token: res.Token})
 	}
 }
 
@@ -215,6 +232,7 @@ func (a *AuthHandler) RegisterAdmin() http.HandlerFunc {
 
 	}
 }
+
 // UserInfo user info
 //
 //	@Summary		user info

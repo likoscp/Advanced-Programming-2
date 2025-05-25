@@ -8,7 +8,7 @@ import (
 
 type Config struct {
 	ConfigServer *ConfigServer
-	// ConfigDB     *ConfigDB
+	ConfigRedis     *ConfigRedis
 }
 
 type ConfigServer struct {
@@ -16,13 +16,9 @@ type ConfigServer struct {
 	AuthAddr string `mapstructure:"AUTH_ADDR"`
 }
 
-// type ConfigDB struct {
-// 	Host     string `mapstructure:"DB_HOST"`
-// 	Addr     string `mapstructure:"DB_ADDR"`
-// 	User     string `mapstructure:"DB_USER"`
-// 	Password string `mapstructure:"DB_PASSWORD"`
-// 	Name     string `mapstructure:"DB_NAME"`
-// }
+type ConfigRedis struct {
+	ADDR     string `mapstructure:"REDIS"`
+}
 
 func NewConfig() *Config {
 	viper.SetConfigFile(".env")
@@ -37,7 +33,15 @@ func NewConfig() *Config {
 	if err != nil {
 		log.Fatal("Environment can't be loaded: ", err)
 	}
+
+	configRedis := ConfigRedis{}
+
+	err = viper.Unmarshal(&configRedis)
+	if err != nil {
+		log.Fatal("Environment can't be loaded: ", err)
+	}
 	return &Config{
 		ConfigServer: &configServer,
+		ConfigRedis: &configRedis,
 	}
 }
