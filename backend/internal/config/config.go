@@ -9,6 +9,7 @@ import (
 type Config struct {
 	ConfigServer *ConfigServer
 	ConfigRedis  *ConfigRedis
+	ConfigS3 *ConfigS3
 }
 
 type ConfigServer struct {
@@ -19,6 +20,14 @@ type ConfigServer struct {
 type ConfigRedis struct {
 	ADDR string `mapstructure:"REDIS_ADDR"`
 	PORT string `mapstructure:"REDIS_PORT"`
+}
+
+type ConfigS3 struct {
+	Endpoint string `mapstructure:"REDIS_ADDR"`
+    AccessKey string`mapstructure:"ACCESSKEY"`
+    SecretKey string `mapstructure:"SECRETKEY"`
+    Bucket string `mapstructure:"BUCKET"`
+    UseSSL bool
 }
 
 func NewConfig() *Config {
@@ -41,8 +50,19 @@ func NewConfig() *Config {
 	if err != nil {
 		log.Fatal("Environment can't be loaded: ", err)
 	}
+
+	configS3 := ConfigS3{}
+
+	err = viper.Unmarshal(&configS3)
+	if err != nil {
+		log.Fatal("Environment can't be loaded: ", err)
+	}
+	configS3.UseSSL = false
+
+
 	return &Config{
 		ConfigServer: &configServer,
 		ConfigRedis:  &configRedis,
+		ConfigS3: &configS3,
 	}
 }

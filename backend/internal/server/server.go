@@ -13,6 +13,7 @@ import (
 type Server struct {
 	config      *config.Config
 	mux         *http.ServeMux
+	minioHandler *handler.S3Handler
 	authHandler *handler.AuthHandler
 }
 
@@ -21,10 +22,16 @@ func NewServer(config *config.Config) (*Server, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	mini, err := handler.NewS3Handler(config.ConfigS3)
+	if err != nil {
+		return nil, err
+	}
 	return &Server{
 		config:      config,
 		mux:         http.NewServeMux(),
 		authHandler: authHandler,
+		minioHandler: mini,
 	}, nil
 }
 
