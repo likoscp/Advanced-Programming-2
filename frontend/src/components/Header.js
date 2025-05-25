@@ -16,10 +16,6 @@ import {
 
 import { ChevronDownIcon, PhoneIcon, PlayCircleIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/20/solid';
 
-const products = [
-
-];
-
 const callsToAction = [
   { name: 'Watch demo', href: '#', icon: PlayCircleIcon },
   { name: 'Contact sales', href: '#', icon: PhoneIcon },
@@ -33,7 +29,7 @@ export default function Header() {
       <nav aria-label="Global" className="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8">
         <div className="flex lg:flex-1">
           <a href="/" className="-m-1.5 p-1.5">
-            <span className="sr-only">Store</span>
+            <span className="sr-only">Comics</span>
             <img
               alt=""
               src="/next.svg"
@@ -52,11 +48,11 @@ export default function Header() {
           </button>
         </div>
         <PopoverGroup className="hidden lg:flex lg:gap-x-12">
-          <a href="/search" className="text-sm/6 font-semibold text-gray-900">
-            Search
+          <a href="/comics" className="text-sm/6 font-semibold text-gray-900">
+            Comics
           </a>
-          <a href="/posts" className="text-sm/6 font-semibold text-gray-900">
-            News
+          <a href="/chapters" className="text-sm/6 font-semibold text-gray-900">
+            Chapters
           </a>
         </PopoverGroup>
         <div className="hidden lg:flex lg:flex-1 lg:justify-around">
@@ -93,16 +89,16 @@ export default function Header() {
             <div className="-my-6 divide-y divide-gray-500/10">
               <div className="space-y-2 py-6">
                 <a
-                  href="/search"
+                  href="/comics"
                   className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-900"
                 >
-                  Search
+                  Comics
                 </a>
                 <a
-                  href="/posts"
+                  href="/chapters"
                   className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-900"
                 >
-                  News
+                  Chapters
                 </a>
 
               </div>

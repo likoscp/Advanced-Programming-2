@@ -48,6 +48,15 @@ services:
     depends_on:
       db:
         condition: service_healthy
+  grpcclient:
+    build:
+      context: ./gateway
+    ports:
+      - "8089:8089"
+    depends_on:
+      - comics-service
+    environment:
+      - GRPC_SERVER_ADDRESS=comics-service:8088
   comics-service:
     build:
       context: ./comics

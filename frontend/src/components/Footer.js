@@ -13,7 +13,7 @@ const Footer = () => {
     <footer className="bg-gray-800 text-white p-4 text-center">
       <div className="flex flex-col md:flex-row justify-between items-center max-w-4xl mx-auto">
         <a
-          href="https://github.com/likoscp/store"
+          href="https://github.com/likoscp/"
           target="_blank"
           rel="noopener noreferrer"
           className="text-gray-400 hover:text-white transition"
