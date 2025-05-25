@@ -3,6 +3,8 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	emailv1 "github.com/barcek2281/finalProto/gen/go/email"
 	"log"
 	"net/http"
 
@@ -11,7 +13,6 @@ import (
 
 	"email-service/internal/db"
 	"email-service/internal/service"
-	emailv1 "github.com/barcek2281/finalProto/gen/go/email"
 )
 
 // Request represents the incoming JSON payload
@@ -113,6 +114,33 @@ func (s *GRPCServer) NotifyComicUploaded(ctx context.Context, req *emailv1.Notif
 	}
 
 	return &emailv1.NotifyComicUploadedResponse{
+		Message: "Emails sent successfully",
+	}, nil
+}
+
+func (s *GRPCServer) NotifyChapterUpdated(ctx context.Context, req *emailv1.NotifyChapterUpdatedRequest) (*emailv1.NotifyChapterUpdatedResponse, error) {
+	// Fetch all users
+	users, err := s.DBClient.GetAllUsers()
+	if err != nil {
+		log.Printf("Failed to fetch users: %v", err)
+		return nil, err
+	}
+
+	// Send email to each user
+	subject := "Chapter Updated!"
+	body := `<h1>Chapter Updated!</h1><p>The chapter titled "` + req.Title + `" (Chapter ` + fmt.Sprintf("%f", req.Number) + `) for comic ID ` + req.ComicId + ` has been updated.</p>`
+	for _, user := range users {
+		email := user["email"].(string)
+		if err := s.EmailService.SendEmail(email, subject, body); err != nil {
+			log.Printf("Failed to send email to %s: %v", email, err)
+			continue
+		}
+		// Increment email sent counter
+		emailSentCounter.Inc()
+		log.Printf("Successfully sent email to %s", email)
+	}
+
+	return &emailv1.NotifyChapterUpdatedResponse{
 		Message: "Emails sent successfully",
 	}, nil
 }

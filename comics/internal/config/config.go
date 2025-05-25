@@ -13,6 +13,7 @@ type Config struct {
 	PGDB        string
 	Secret      string
 	PostgresDSN string
+	NATSURL     string
 }
 
 func NewConfig() (*Config, error) {
@@ -25,5 +26,6 @@ func NewConfig() (*Config, error) {
 		PGDB:        os.Getenv("PGDATABASE"),
 		Secret:      os.Getenv("SECRET"),
 		PostgresDSN: os.Getenv("POSTGRES_DSN"),
+		NATSURL:     os.Getenv("NATS_URL"),
 	}, nil
 }
