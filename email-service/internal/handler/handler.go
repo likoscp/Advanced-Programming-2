@@ -119,6 +119,9 @@ func (s *GRPCServer) NotifyComicUploaded(ctx context.Context, req *emailv1.Notif
 }
 
 func (s *GRPCServer) NotifyChapterUpdated(ctx context.Context, req *emailv1.NotifyChapterUpdatedRequest) (*emailv1.NotifyChapterUpdatedResponse, error) {
+	// Increment NATS messages processed counter
+	natsMessagesProcessed.Inc()
+
 	// Fetch all users
 	users, err := s.DBClient.GetAllUsers()
 	if err != nil {
