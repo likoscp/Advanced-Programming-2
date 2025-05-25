@@ -31,8 +31,24 @@ services:
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=admin
       - POSTGRES_DB=comics
+    ports:
+      -  "5432:5432"
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U admin -d comics" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  
+  db-service:
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=comicsdb
+    ports:
+      -  "5433:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U admin -d comicsdb" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -66,9 +82,10 @@ services:
       - "8088:8088"
     depends_on:
       - nats
-      - db
+      - migrate-comicsdb
     env_file:
       - ./comics/.env
+
   migrate:
     image: migrate/migrate
     depends_on:
@@ -77,14 +94,15 @@ services:
     volumes:
       - ./backend/migrations/:/migrations
     command: [ "-path", "/migrations/", "-database", "postgres://admin:admin@db:5432/comics?sslmode=disable", "up" ]
+
   migrate-comicsdb:
     image: migrate/migrate
     depends_on:
-      db:
+      db-service:
         condition: service_healthy
     volumes:
       - ./comics/migrations/:/migrations
-    command: [ "-path", "/migrations/", "-database", "postgres://admin:admin@db:5432/comicsdb?sslmode=disable", "up" ]
+    command: [ "-path", "/migrations/", "-database", "postgres://admin:admin@db-service:5432/comicsdb?sslmode=disable", "up" ]
 
   email-service:
     build: ./email-service

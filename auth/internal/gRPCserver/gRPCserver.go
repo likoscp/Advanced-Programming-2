@@ -69,7 +69,7 @@ type GRPCserver struct {
 }
 
 func NEWgrpcserver(config *configs.Config) (*GRPCserver, error) {
-	store, err := postgresql.NewStore(*config.ConfigDB)
+	store, err := postgresql.NewStore(config.ConfigDB)
 	if err != nil {
 		return nil, err
 	}
