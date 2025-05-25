@@ -12,9 +12,13 @@ type Store struct {
 	db *sql.DB
 }
 
-func NewStore(config configs.ConfigDB) (*Store, error) {
-	cnn := fmt.Sprintf("user=%s dbname=%s password=%s host=%s port=%s sslmode=disable",
-		config.User, config.Name, config.Password, config.Host, config.Addr)
+func NewStore(config *configs.ConfigDB) (*Store, error) {
+	fmt.Printf("%+v", config)
+	cnn := fmt.Sprintf(
+		"user=%s password=%s dbname=%s host=%s port=%s sslmode=disable",
+		config.User, config.Password, config.Name, config.Host, config.Addr,
+	)
+
 	db, err := sql.Open("postgres", cnn)
 	if err != nil {
 		return nil, err

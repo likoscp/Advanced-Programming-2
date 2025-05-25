@@ -8,16 +8,17 @@ import (
 
 type Config struct {
 	ConfigServer *ConfigServer
-	ConfigRedis     *ConfigRedis
+	ConfigRedis  *ConfigRedis
 }
 
 type ConfigServer struct {
-	Addr string `mapstructure:"SERVER_ADDR"`
+	Addr     string `mapstructure:"SERVER_ADDR"`
 	AuthAddr string `mapstructure:"AUTH_ADDR"`
 }
 
 type ConfigRedis struct {
-	ADDR     string `mapstructure:"REDIS"`
+	ADDR string `mapstructure:"REDIS_ADDR"`
+	PORT string `mapstructure:"REDIS_PORT"`
 }
 
 func NewConfig() *Config {
@@ -42,6 +43,6 @@ func NewConfig() *Config {
 	}
 	return &Config{
 		ConfigServer: &configServer,
-		ConfigRedis: &configRedis,
+		ConfigRedis:  &configRedis,
 	}
 }

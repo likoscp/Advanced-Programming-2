@@ -5,9 +5,9 @@ import (
 	"github.com/likoscp/Advanced-Programming-2/backend/internal/config"
 )
 
-func NewRedisClient(config *config.Config) *redis.Client {
-    return redis.NewClient(&redis.Options{
-        Addr: "redis:" + config.ConfigRedis.ADDR,
-        DB:   0,
-    })
+func NewRedisClient(config *config.ConfigRedis) *redis.Client {
+	return redis.NewClient(&redis.Options{
+		Addr: config.ADDR + ":" + config.PORT,
+		DB:   0,
+	})
 }

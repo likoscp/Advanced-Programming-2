@@ -29,7 +29,7 @@ func NewAuthHandler(config *config.Config) (*AuthHandler, error) {
 	authClient := authv1.NewAuthClient(conn)
 	return &AuthHandler{
 		AuthClient: authClient,
-		cache: cache.NewRedisClient(config),
+		cache: cache.NewRedisClient(config.ConfigRedis),
 	}, err
 }
 
