@@ -3,7 +3,7 @@ module email-service
 go 1.23.3
 
 require (
-	github.com/barcek2281/finalProto v0.0.0-20250524061053-3ed739d9c5af
+	github.com/barcek2281/finalProto v0.0.0-20250525184413-10ca4b82e5ad
 	github.com/joho/godotenv v1.5.1
 	github.com/lib/pq v1.10.9
 	github.com/nats-io/nats.go v1.42.0

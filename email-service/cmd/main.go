@@ -49,7 +49,7 @@ func main() {
 		}
 	}()
 
-	// Initialize NATS client and subscribe to comic uploaded events
+	// Initialize NATS client and subscribe to events
 	natsClient, err := subscriber.NewNATSClient(cfg.NATSURL, postgresClient, emailService)
 	if err != nil {
 		log.Fatalf("Failed to connect to NATS: %v", err)
@@ -59,15 +59,18 @@ func main() {
 	if err := natsClient.SubscribeComicUploaded(); err != nil {
 		log.Fatalf("Failed to subscribe to comic.uploaded: %v", err)
 	}
+	if err := natsClient.SubscribeChapterUpdated(); err != nil {
+		log.Fatalf("Failed to subscribe to chapter.updated: %v", err)
+	}
 
 	// Start gRPC server
-	grpcAddr := cfg.GRPCAddr // Use GRPCAddr from config
+	grpcAddr := cfg.GRPCAddr
 	lis, err := net.Listen("tcp", grpcAddr)
 	if err != nil {
 		log.Fatalf("Failed to listen on gRPC port %s: %v", grpcAddr, err)
 	}
 	grpcServer := grpc.NewServer()
-	emailv1.RegisterEmailServiceServer(grpcServer, handler.NewGRPCServer(postgresClient, emailService)) // Correct registration
+	emailv1.RegisterEmailServiceServer(grpcServer, handler.NewGRPCServer(postgresClient, emailService))
 
 	log.Printf("Starting email gRPC server on %s", grpcAddr)
 	if err := grpcServer.Serve(lis); err != nil {

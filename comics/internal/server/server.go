@@ -2,15 +2,13 @@ package server
 
 import (
 	"fmt"
-
-	// "github.com/likoscp/finalAddProgramming/producer/pkg/nats"
 	"github.com/likoscp/finalAddProgramming/comics/internal/config"
 	grpcCustom "github.com/likoscp/finalAddProgramming/comics/internal/grpc"
 	"github.com/likoscp/finalAddProgramming/comics/internal/repository"
 	"github.com/likoscp/finalAddProgramming/comics/internal/service"
-
-	comicsPb "github.com/likoscp/finalAddProgramming/finalProto/gen/go/comics"
+	"github.com/likoscp/finalAddProgramming/comics/producer"
 	chaptersPb "github.com/likoscp/finalAddProgramming/finalProto/gen/go/chapters"
+	comicsPb "github.com/likoscp/finalAddProgramming/finalProto/gen/go/comics"
 
 	"log"
 	"net"
@@ -22,8 +20,9 @@ import (
 )
 
 type Server struct {
-	cfg        *config.Config
-	grpcServer *grpc.Server
+	cfg           *config.Config
+	grpcServer    *grpc.Server
+	natsPublisher *producer.Publisher
 }
 
 func NewServer(cfg *config.Config) *Server {
@@ -61,21 +60,22 @@ func (s *Server) StartGRPC() error {
 
 	log.Println("✅ Successfully connected to Postgres")
 
+	natsPublisher, err := producer.NewPublisher(s.cfg.NATSURL)
+	if err != nil {
+		log.Fatalf("failed to create NATS publisher: %v", err)
+	}
+	s.natsPublisher = natsPublisher
+
 	comicRepo := repository.NewComicRepository(db)
 	comicService := service.NewComicsService(comicRepo, s.cfg.Secret)
 
-	// publisher, err := nats.NewPublisher("nats://nats:4222")
-	// if err != nil {
-	// 	log.Fatalf("failed to create NATS publisher: %v", err)
-	// }
-
-	comicGRPC := grpcCustom.NewComicGRPCHandler(comicService) 
+	comicGRPC := grpcCustom.NewComicGRPCHandler(comicService)
 	comicsPb.RegisterComicsServiceServer(s.grpcServer, comicGRPC)
 
-
-	chapterGRPC := grpcCustom.NewChapterGRPCHandler(service.NewChaptersService(repository.NewChapterRepository(db)))
+	chapterGRPC := grpcCustom.NewChapterGRPCHandler(service.NewChaptersService(repository.NewChapterRepository(db), s.natsPublisher))
 	chaptersPb.RegisterChaptersServiceServer(s.grpcServer, chapterGRPC)
 	reflection.Register(s.grpcServer)
+
 	log.Println("🚀 gRPC server started on port " + s.cfg.Addr)
 	return s.grpcServer.Serve(lis)
 }
