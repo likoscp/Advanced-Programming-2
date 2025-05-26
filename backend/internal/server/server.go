@@ -40,5 +40,6 @@ func (s *Server) Run() error {
 	s.authHandler.Configure(s.mux)
 
 	s.mux.Handle("/swagger/", httpSwagger.WrapHandler)
+	s.mux.HandleFunc("POST /comics/", s.minioHandler.UploadHandler)
 	return http.ListenAndServe(":"+s.config.ConfigServer.Addr, s.mux)
 }

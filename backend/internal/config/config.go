@@ -23,7 +23,7 @@ type ConfigRedis struct {
 }
 
 type ConfigS3 struct {
-	Endpoint string `mapstructure:"REDIS_ADDR"`
+	Endpoint string `mapstructure:"MINIO_ADDR"`
     AccessKey string`mapstructure:"ACCESSKEY"`
     SecretKey string `mapstructure:"SECRETKEY"`
     Bucket string `mapstructure:"BUCKET"`
